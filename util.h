@@ -1,5 +1,7 @@
 #include <pthread.h>
 
+#define SESSION_MAXAGE 60 // 1분
+
 /**
  * 텍스트 파일을 통째로 읽어옵니다. 성공하면 읽은 바이트 수를, 실패하면 음수를 반환합니다.
  *
@@ -77,8 +79,8 @@ int CheckSession(Database* db, const char* sessionID);
 /**
  * 사용자가 저장한 텍스트를 가져옵니다. 성공하면 텍스트를, 실패하면 NULL을 반환합니다.
  */
-char* GetUserText(Database* db, const char* id);
+const char* GetUserText(Database* db, const char* sessionID);
 /**
  * 텍스트를 저장합니다. 성공하면 0을, 실패하면 음수를 반환합니다.
  */
-int SetUserText(Database* db, const char* id, const char* text);
+int SetUserText(Database* db, const char* sessionID, const char* text);

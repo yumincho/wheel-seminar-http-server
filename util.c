@@ -193,7 +193,7 @@ int Register(Database* db, const char* id, const char* password) {
 	return 0;
 }
 int Login(Database* db, const char* id, const char* password, char** sessionID) {
-	void** const entry = *FindDatabaseEntry(db, "user", id);
+	void** const entry = FindDatabaseEntry(db, "user", id);
 	if (entry == NULL) {
 		return -1; // 존재하지 않는 아이디입니다.
 	}
@@ -232,17 +232,33 @@ int CheckSession(Database* db, const char* sessionID) {
 		return -1;
 	}
 
-	if (time(NULL) - ((Session*)*entry)->CreateTime > 1 * 60) { // 세션의 유효 시간은 1분입니다.
-		return -2;
+	if (time(NULL) - ((Session*)*entry)->CreateTime > SESSION_MAXAGE) { 
+		return -2; // 세션의 유효 시간이 지났습니다.
 	}
 
 	return 0;
 }
 
-char* GetUserText(Database* db, const char* id) {
-	void** const entry = FindDatabaseEntry(db, "text", id);
-	return entry ? (*entry ? (char*)*entry : "") : NULL;
+const char* GetUserText(Database* db, const char* sessionID) {
+	void** sessionEntry = FindDatabaseEntry(db, "session", sessionID);
+	if (sessionEntry == NULL) {
+		return NULL;
+	}
+
+	void** const entry = FindDatabaseEntry(db, "text", ((Session*)*sessionEntry)->UserID);
+	return entry ? *entry : "";
 }
-int SetUserText(Database* db, const char* id, const char* text) {
-	return AddDatabaseEntry(db, "text", id, CopyString(text));
+int SetUserText(Database* db, const char* sessionID, const char* text) {
+	void** sessionEntry = FindDatabaseEntry(db, "session", sessionID);
+	if (sessionEntry == NULL) {
+		return -1;
+	}
+
+	void** const entry = FindDatabaseEntry(db, "text", ((Session*)*sessionEntry)->UserID);
+	if (entry != NULL) {
+		*entry = CopyString(text);
+		return 0;
+	} else {
+		return AddDatabaseEntry(db, "text", ((Session*)*sessionEntry)->UserID, CopyString(text));
+	}
 }

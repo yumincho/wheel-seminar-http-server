@@ -1,8 +1,8 @@
 #include <pthread.h>
 #include <netinet/in.h>
 
-#define BUFFER_SIZE 1024
-#define TIMEOUT 5000 // ms
+#define BUFFER_SIZE 2048
+#define TIMEOUT 5000 // 5초
 
 typedef struct {
 	int Socket;
