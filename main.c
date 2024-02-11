@@ -1,11 +1,15 @@
 #include "http.h"
+#include "util.h"
 
+// 추가적으로 필요한 헤더 파일이 있다면 여기에 추가해 주세요.
 #include <stdio.h>
 #include <string.h>
 
 #define PORT 8080
 #define BACKLOG 10
 
+
+Database g_Database;
 int DoSomething(HttpClient* client, const char* request, char* response);
 
 int main(int argc, char** argv) {
@@ -19,6 +23,11 @@ int main(int argc, char** argv) {
 		}
 	} else if (argc >= 3) {
 		printf("사용법: %s [포트]\n", argv[0]);
+		return 1;
+	}
+
+	if (CreateDatabase(&g_Database) < 0) {
+		printf("데이터베이스를 생성하지 못했습니다.\n");
 		return 1;
 	}
 

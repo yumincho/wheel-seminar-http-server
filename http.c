@@ -41,7 +41,7 @@ int OpenHttpServer(HttpServer* server, int port, int backlog) {
 	return 0;
 }
 int AcceptHttpClient(HttpServer* server, HttpClient** client, int (*callback)(HttpClient*, const char*, char*)){
-	HttpClientNode* clientNode = (HttpClientNode*)malloc(sizeof(HttpClientNode));
+	HttpClientNode* const clientNode = (HttpClientNode*)malloc(sizeof(HttpClientNode));
 	if (clientNode == NULL) {
 		return -1;
 	} else {
