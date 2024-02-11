@@ -8,7 +8,6 @@
 #define PORT 8080
 #define BACKLOG 10
 
-
 Database g_Database;
 int DoSomething(HttpClient* client, const char* request, char* response);
 
