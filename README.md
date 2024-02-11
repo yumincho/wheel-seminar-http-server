@@ -36,7 +36,9 @@
 
 ### TMI
 - 가끔 서버를 비정상적으로 종료한 경우, 같은 포트에서 서버가 열리지 않는 경우가 있습니다. 시간이 지나면 해당 포트를 다시 사용할 수 있지만, 이런 경우에는 다른 포트에 여시는 것이 속 편합니다.
-- telnet을 이용해 테스트해 보고 싶으시다면, telnet의 표준 입력을 Redirection하거나 Here Document(`<<`)를 사용하셔야 합니다. telnet은 줄 단위로 서버에 데이터를 전송하는데, 현재 구현체에서는 줄 단위로 따로 전송된 HTTP 요청을 합쳐서 처리하는 기능이 구현되어 있지 않기 때문입니다.
+- 웹 브라우저 없이 테스트하고 싶으시다면, telnet 대신 curl 명령어를 사용하셔야 합니다.
+	- GET 예시: `curl -i -H "Connection: keep-alive" localhost:8080`
+	- POST 예시: `curl -i -d "id=sparcs&password=wheel" localhost:8080/login`
 
 ## 참고한 곳
 - https://github.com/GrasshopperBears/sparcs-simple-http-server
