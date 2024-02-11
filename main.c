@@ -48,20 +48,25 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
 	/*
 		아래에 있는 코드를 삭제하고, 여러분만의 코드를 작성해 주세요!
 
-		request 매개변수에는 클라이언트가 보낸 HTTP 요청이 저장되어 있습니다.
-		response 매개변수에는 여러분이 보낼 HTTP 응답을 저장하면 됩니다. 널 문자를 포함하여 최대 1024바이트까지만 저장할 수 있습니다.
-		(더 긴 길이의 응답이 필요하다면 http.h 헤더 파일의 BUFFER_SIZE 매크로를 수정하면 됩니다.)
+		request 매개변수에는 클라이언트가 보낸 HTTP 요청이 저장되어 있습니다. 널 문자를 포함하여 최대 2048바이트까지만 저장됩니다.
+		response 매개변수에는 여러분이 보낼 HTTP 응답을 저장하면 됩니다. 널 문자를 포함하여 최대 2048바이트까지만 저장할 수 있습니다.
+		(더 긴 길이의 요청/응답이 필요하다면 http.h 파일의 BUFFER_SIZE 매크로를 수정하면 됩니다.)
 
 		이 함수의 리턴값의 의미는 다음과 같습니다:
 		- 음수: 오류가 발생한 경우입니다. 클라이언트에 HTTP 응답을 보내지 않고 연결을 끊습니다.
 		- 0: 클라이언트에 HTTP 응답을 보내고, 연결을 끊지 않고 대기합니다.
 		- 양수: 클라이언트에 HTTP 응답을 보내고, 연결을 끊습니다.
-
-		util.h 헤더 파일에 도움이 될 만한 함수를 몇 개 준비해 두었으니, 사용하시면 편리할겁니다!
-		화이팅입니다.
 	*/
 
-	strcpy(response, "HTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\nHello World"); // 예제 코드입니다.
+	char* dynamicContent = "Hello, world!";
+
+	sprintf(response,
+		"HTTP/1.1 200 OK\r\n"
+		"Content-Length: %d\r\n"
+		"Content-Type: text/plain\r\n"
+		"\r\n"
+		"%s",
+		(int)strlen(dynamicContent), dynamicContent);
 
 	return 0;
 }
