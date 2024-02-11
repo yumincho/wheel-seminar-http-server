@@ -36,7 +36,7 @@
 
 ### TMI
 - 가끔 서버를 비정상적으로 종료한 경우, 같은 포트에서 서버가 열리지 않는 경우가 있습니다. 시간이 지나면 해당 포트를 다시 사용할 수 있지만, 이런 경우에는 다른 포트에 여시는 것이 속 편합니다.
-- telnet을 이용해 테스트해 보고 싶으시다면, `http.h` 파일에 정의된 `TIMEOUT`의 값을 넉넉하게 늘리신 뒤 서버를 구동해 주세요.
+- telnet을 이용해 테스트해 보고 싶으시다면, telnet의 표준 입력을 Redirection하거나 Here Document(`<<`)를 사용하셔야 합니다. telnet은 줄 단위로 서버에 데이터를 전송하는데, 현재 구현체에서는 줄 단위로 따로 전송된 HTTP 요청을 합쳐서 처리하는 기능이 구현되어 있지 않기 때문입니다.
 
 ## 참고한 곳
 - https://github.com/GrasshopperBears/sparcs-simple-http-server
