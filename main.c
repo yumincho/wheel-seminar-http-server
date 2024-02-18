@@ -59,8 +59,25 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
           - 양수: 클라이언트에 HTTP 응답을 보내고, 연결을 끊습니다.
   */
 
-  char* dynamicContent = "Hello, world!";
+  char** splited;
+  SplitString(request, "\n", &splited);
 
+  char** requestLine;
+  SplitString(splited[0], " ", &requestLine);
+
+  // HTTP/1.1 외의 HTTP 요청은 적절한 응답 코드를 보내 거절합니다.
+  if (!strcmp(requestLine[2], "HTTP/1.1")) {
+    printf("not HTTP/1.1: %s\n", requestLine[2]);
+    sprintf(response,
+            "HTTP/1.1 505 HTTP Version Not Supported\r\n"
+            "Content-Length: 0\r\n"
+            "Content-Type: text/plain\r\n"
+            "\r\n");
+    return 0;
+  }
+
+  /*
+  char* dynamicContent = "Hello, world!";
   sprintf(response,
           "HTTP/1.1 200 OK\r\n"
           "Content-Length: %d\r\n"
@@ -68,6 +85,7 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
           "\r\n"
           "%s",
           (int)strlen(dynamicContent), dynamicContent);
+  */
 
   return 0;
 }
