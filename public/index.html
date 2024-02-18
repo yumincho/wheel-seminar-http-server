@@ -1,34 +1,34 @@
 <!DOCTYPE html>
 <html lang="ko">
-	<head>
-		<meta charset="UTF-8" />
-		<title>메인</title>
-	</head>
-	<body>
-		<div>
-			<h1>메인 페이지</h1>
-			<textarea id="text" rows="10" cols="50"></textarea>
-			<script>
-				var xhr = new XMLHttpRequest();
-				xhr.open("GET", "/text", true);
-				xhr.send();
-				xhr.onreadystatechange = function() {
-					if (xhr.readyState === XMLHttpRequest.DONE) {
-						if (xhr.status === 200) {
-							document.getElementById("text").value = xhr.responseText;
-						} else {
-							console.error("Error: " + xhr.status);
-						}
-					}
-				};
+  <head>
+    <meta charset="UTF-8" />
+    <title>메인</title>
+  </head>
+  <body>
+    <div>
+      <h1>메인 페이지</h1>
+      <textarea id="text" rows="10" cols="50"></textarea>
+      <script>
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/text", true);
+        xhr.send();
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+              document.getElementById("text").value = xhr.responseText;
+            } else {
+              console.error("Error: " + xhr.status);
+            }
+          }
+        };
 
-				document.getElementById("text").addEventListener("input", function() {
-					var xhr = new XMLHttpRequest();
-					xhr.open("POST", "/text", true);
-					xhr.setRequestHeader("Content-Type", "text/plain");
-					xhr.send(document.getElementById("text").value);
-				});
-			</script>
-		</div>
-	</body>
+        document.getElementById("text").addEventListener("input", function () {
+          var xhr = new XMLHttpRequest();
+          xhr.open("POST", "/text", true);
+          xhr.setRequestHeader("Content-Type", "text/plain");
+          xhr.send(document.getElementById("text").value);
+        });
+      </script>
+    </div>
+  </body>
 </html>
