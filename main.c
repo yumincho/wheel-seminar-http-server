@@ -76,6 +76,24 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
     return 0;
   }
 
+  char** connectionLine;
+  SplitString(splited[2], " ", &connectionLine);
+
+  // Connection 헤더의 값에 따라, HTTP 응답을 보낸 후 TCP 연결을 끊거나 유지해야
+  // 합니다. 간단함을 위해, keep-alive인 경우(대소문자 구분 X) 연결을 유지하고,
+  // 그 외의 경우 연결을 즉시 끊는 것으로 합니다.
+  if (!strcmp(connectionLine[1], "keep-alive")) {
+    printf("Close connection\n");
+    sprintf(response,
+            "HTTP/1.1 401 Access Denied\r\n"
+            "Content-Length: 0\r\n"
+            "Content-Type: text/plain\r\n"
+            "Connection: close\r\n"
+            "\r\n");
+  } else {
+    printf("Keep connection\n");
+  }
+
   /*
   char* dynamicContent = "Hello, world!";
   sprintf(response,
