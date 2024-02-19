@@ -94,6 +94,69 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
     printf("Keep connection\n");
   }
 
+  /* GET / */
+  // 로그인된 경우, public/index.html 파일을 전송합니다.
+  // 로그인되지 않은 경우, /login으로 리다이렉트합니다.
+  char** cookieLine;
+  for (int i = 0; i < splitedNum; i++) {
+    if (strstr(splited[i], "Cookie:")) {
+      SplitString(splited[i], " ", &cookieLine);
+      break;
+    }
+  }
+
+  char** sessionID;
+  SplitString(cookieLine[2], "=", &sessionID);
+
+  if (!strcmp(startLine[0], "GET") && !strcmp(startLine[1], "/")) {
+    int sessionChecked = CheckSession(&g_Database, sessionID[1]);
+    if (sessionChecked == 0) {
+      char* content;
+      ReadTextFile("public/index.html", &content);
+
+      sprintf(response,
+              "HTTP/1.1 200 OK\r\n"
+              "Content-Length: %d\r\n"
+              "Content-Type: text/html\r\n"
+              "\r\n%s",
+              (int)strlen(content), content);
+    } else {
+      sprintf(response,
+              "HTTP/1.1 302 Found\r\n"
+              "Location: /login\r\n"
+              "Content-Length: 0\r\n"
+              "Content-Type: text/planin\r\n"
+              "\r\n");
+    }
+  }
+
+  /* GET /login */
+  // 로그인된 경우, /로 리다이렉트합니다.
+  // 로그인되지 않은 경우, public/login.html 파일을 전송합니다.
+  if (!strcmp(startLine[0], "GET") && !strcmp(startLine[1], "/login")) {
+    int sessionChecked = CheckSession(&g_Database, sessionID[1]);
+    if (sessionChecked == 0) {
+      sprintf(response,
+              "HTTP/1.1 200 OK: Authorized\r\n"
+              "Location: /\r\n"
+              "Content-Length: 0\r\n"
+              "Content-Type: text/plain\r\n"
+              "\r\n");
+    } else {
+      char* content;
+      ReadTextFile("public/login.html", &content);
+
+      sprintf(response,
+              "HTTP/1.1 302 Found\r\n"
+              "Content-Length: %d\r\n"
+              "Content-Type: text/html\r\n"
+              "\r\n%s",
+              (int)strlen(content), content);
+
+      printf("response:\n %s\n", response);
+    }
+  }
+
   /*
   char* dynamicContent = "Hello, world!";
   sprintf(response,
