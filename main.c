@@ -103,20 +103,18 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
     printf("Keep connection\n");
   }
 
+  /* Session Checking */
+  char **cookieLine, **sessionID;
+  int cookieIndex = FindLine(splitedNum, splited, "Cookie:");
+  if (cookieIndex != -1) {
+    cookieLine = &splited[cookieIndex];
+    SplitString(splited[cookieIndex], " ", &cookieLine);
+    SplitString(cookieLine[2], "=", &sessionID);
+  }
+
   /* GET / */
   // 로그인된 경우, public/index.html 파일을 전송합니다.
   // 로그인되지 않은 경우, /login으로 리다이렉트합니다.
-  char** cookieLine;
-  for (int i = 0; i < splitedNum; i++) {
-    if (strstr(splited[i], "Cookie:")) {
-      SplitString(splited[i], " ", &cookieLine);
-      break;
-    }
-  }
-
-  char** sessionID;
-  SplitString(cookieLine[2], "=", &sessionID);
-
   if (!strcmp(startLine[0], "GET") && !strcmp(startLine[1], "/")) {
     int sessionChecked = CheckSession(&g_Database, sessionID[1]);
     if (sessionChecked == 0) {
