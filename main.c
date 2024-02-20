@@ -140,7 +140,7 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
       ReadTextFile("public/login.html", &content);
 
       sprintf(response,
-              "HTTP/1.1 302 Found\r\n"
+              "HTTP/1.1 200 OK\r\n"
               "Content-Length: %d\r\n"
               "Content-Type: text/html\r\n"
               "\r\n%s",
@@ -192,7 +192,7 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
   if (!strcmp(startLine[0], "GET") && !strcmp(startLine[1], "/register")) {
     if (sessionChecked == 0) {
       sprintf(response,
-              "HTTP/1.1 200 OK: Authorized\r\n"
+              "HTTP/1.1 302 Found\r\n"
               "Location: /\r\n"
               "Content-Length: 0\r\n"
               "Content-Type: text/plain\r\n"
