@@ -210,6 +210,40 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
     }
   }
 
+  /* POST /register */
+  // 로그인된 경우, 적절한 응답 코드를 보내 잘못된 접근임을 알립니다.
+  // 로그인되지 않은 경우, 아이디와 비밀번호를 검증해 회원가입합니다.
+  // 성공한 경우, /login으로 리다이렉트합니다.
+  if (!strcmp(startLine[0], "POST") && !strcmp(startLine[1], "/register")) {
+    if (sessionChecked == 0) {
+      sprintf(response,
+              "HTTP/1.1 400 Bad Request\r\n"
+              "Content-Length: 0\r\n"
+              "Content-Type: text/plain\r\n"
+              "\r\n");
+    } else {
+      char **splitedBody, **id, **pw;
+      SplitString(body, "&", &splitedBody);
+      SplitString(splitedBody[0], "=", &id);
+      SplitString(splitedBody[1], "=", &pw);
+      int registerResult = Register(&g_Database, id[1], pw[1]);
+      if (registerResult == 0) {
+        sprintf(response,
+                "HTTP/1.1 302 Found\r\n"
+                "Location: /login\r\n"
+                "Content-Length: 0\r\n"
+                "Content-Type: text/plain\r\n"
+                "\r\n");
+      } else {
+        sprintf(response,
+                "HTTP/1.1 403 Forbidden\r\n"
+                "Content-Length: 0\r\n"
+                "Content-Type: text/plain\r\n"
+                "\r\n");
+      }
+    }
+  }
+
   // Connection 헤더의 값에 따라, HTTP 응답을 보낸 후 TCP 연결을 끊거나 유지해야
   // 합니다. 간단함을 위해, keep-alive인 경우(대소문자 구분 X) 연결을 유지하고,
   // 그 외의 경우 연결을 즉시 끊는 것으로 합니다.
