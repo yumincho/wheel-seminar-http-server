@@ -42,6 +42,15 @@ int main(int argc, char** argv) {
   }
 }
 
+int FindLine(int num, char** splited, char* target) {
+  for (int i = 0; i < num; i++) {
+    if (strstr(splited[i], target)) {
+      return i;
+    }
+  }
+  return -1;
+}
+
 int DoSomething(HttpClient* client, const char* request, char* response) {
   /*
           아래에 있는 코드를 삭제하고, 여러분만의 코드를 작성해 주세요!
