@@ -69,7 +69,7 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
   */
 
   char** splitedRequest;
-  int numOfRequestLines = SplitString(request, "\n", &splitedRequest);
+  int numOfRequestLines = SplitString(request, "\r\n", &splitedRequest);
 
   char** splitedRequestByBlankLine;
   SplitString(request, "\r\n\r\n", &splitedRequestByBlankLine);
@@ -79,8 +79,7 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
   SplitString(splitedRequest[0], " ", &startLine);
 
   // HTTP/1.1 외의 HTTP 요청은 적절한 응답 코드를 보내 거절합니다.
-  if (!strcmp(startLine[2], "HTTP/1.1")) {
-    printf("not HTTP/1.1: %s\n", startLine[2]);
+  if (strcmp(startLine[2], "HTTP/1.1")) {
     sprintf(response,
             "HTTP/1.1 505 HTTP Version Not Supported\r\n"
             "Content-Length: 0\r\n"
