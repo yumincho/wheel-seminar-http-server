@@ -68,11 +68,11 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
           - 양수: 클라이언트에 HTTP 응답을 보내고, 연결을 끊습니다.
   */
 
-  char** splited;
-  int splitedNum = SplitString(request, "\n", &splited);
+  char** splitedRequest;
+  int numOfRequestLines = SplitString(request, "\n", &splitedRequest);
 
   char** startLine;
-  SplitString(splited[0], " ", &startLine);
+  SplitString(splitedRequest[0], " ", &startLine);
 
   // HTTP/1.1 외의 HTTP 요청은 적절한 응답 코드를 보내 거절합니다.
   if (!strcmp(startLine[2], "HTTP/1.1")) {
@@ -87,10 +87,10 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
 
   /* Session Checking */
   char **cookieLine, **sessionID;
-  int cookieIndex = FindLine(splitedNum, splited, "Cookie:");
+  int cookieIndex = FindLine(numOfRequestLines, splitedRequest, "Cookie:");
   if (cookieIndex != -1) {
-    cookieLine = &splited[cookieIndex];
-    SplitString(splited[cookieIndex], " ", &cookieLine);
+    cookieLine = &splitedRequest[cookieIndex];
+    SplitString(splitedRequest[cookieIndex], " ", &cookieLine);
     SplitString(cookieLine[2], "=", &sessionID);
   }
 
@@ -150,8 +150,9 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
   // 합니다. 간단함을 위해, keep-alive인 경우(대소문자 구분 X) 연결을 유지하고,
   // 그 외의 경우 연결을 즉시 끊는 것으로 합니다.
   char** connectionLine = NULL;
-  int connectionIdx = FindLine(splitedNum, splited, "Connection:");
-  SplitString(splited[connectionIdx], " ", &connectionLine);
+  int connectionIdx =
+      FindLine(numOfRequestLines, splitedRequest, "Connection:");
+  SplitString(splitedRequest[connectionIdx], " ", &connectionLine);
   if (!strncmp(connectionLine[1], "keep-alive", 10)) {
     return 0;
   } else {
