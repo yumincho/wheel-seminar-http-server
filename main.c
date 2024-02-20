@@ -187,6 +187,30 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
     }
   }
 
+  /* GET /register */
+  // 로그인된 경우, /로 리다이렉트합니다.
+  // 로그인되지 않은 경우, public/register.html 파일을 전송합니다.
+  if (!strcmp(startLine[0], "GET") && !strcmp(startLine[1], "/register")) {
+    if (sessionChecked == 0) {
+      sprintf(response,
+              "HTTP/1.1 200 OK: Authorized\r\n"
+              "Location: /\r\n"
+              "Content-Length: 0\r\n"
+              "Content-Type: text/plain\r\n"
+              "\r\n");
+    } else {
+      char* content;
+      ReadTextFile("public/register.html", &content);
+
+      sprintf(response,
+              "HTTP/1.1 302 Found\r\n"
+              "Content-Length: %d\r\n"
+              "Content-Type: text/html\r\n"
+              "\r\n%s",
+              (int)strlen(content), content);
+    }
+  }
+
   // Connection 헤더의 값에 따라, HTTP 응답을 보낸 후 TCP 연결을 끊거나 유지해야
   // 합니다. 간단함을 위해, keep-alive인 경우(대소문자 구분 X) 연결을 유지하고,
   // 그 외의 경우 연결을 즉시 끊는 것으로 합니다.
