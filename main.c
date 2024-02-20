@@ -71,6 +71,10 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
   char** splitedRequest;
   int numOfRequestLines = SplitString(request, "\n", &splitedRequest);
 
+  char** splitedRequestByBlankLine;
+  SplitString(request, "\r\n\r\n", &splitedRequestByBlankLine);
+  char* body = splitedRequestByBlankLine[1];
+
   char** startLine;
   SplitString(splitedRequest[0], " ", &startLine);
 
@@ -141,8 +145,44 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
               "Content-Type: text/html\r\n"
               "\r\n%s",
               (int)strlen(content), content);
+    }
+  }
 
-      printf("response:\n %s\n", response);
+  /* POST /login */
+  // 로그인된 경우, 적절한 응답 코드를 보내 잘못된 접근임을 알립니다.
+  // 로그인되지 않은 경우, 아이디와 비밀번호를 검증해 로그인합니다.
+  // 쿠키를 이용해 세션 정보를 저장해야 합니다.
+  // 성공한 경우, /로 리다이렉트합니다.
+  if (!strcmp(startLine[0], "POST") && !strcmp(startLine[1], "/login")) {
+    int sessionChecked = CheckSession(&g_Database, sessionID[1]);
+    if (sessionChecked == 0) {
+      sprintf(response,
+              "HTTP/1.1 400 Bad Request\r\n"
+              "Content-Length: 0\r\n"
+              "Content-Type: text/plain\r\n"
+              "\r\n");
+    } else {
+      char **splitedBody, **id, **pw, *newSessionID;
+      SplitString(body, "&", &splitedBody);
+      SplitString(splitedBody[0], "=", &id);
+      SplitString(splitedBody[1], "=", &pw);
+      int loginResult = Login(&g_Database, id[1], pw[1], &newSessionID);
+      if (loginResult == 0) {
+        sprintf(response,
+                "HTTP/1.1 302 Found\r\n"
+                "Set-Cookie: sessionID=%s\r\n"
+                "Location: /\r\n"
+                "Content-Length: 0\r\n"
+                "Content-Type: text/plain\r\n"
+                "\r\n",
+                newSessionID);
+      } else {
+        sprintf(response,
+                "HTTP/1.1 403 Forbidden\r\n"
+                "Content-Length: 0\r\n"
+                "Content-Type: text/plain\r\n"
+                "\r\n");
+      }
     }
   }
 
