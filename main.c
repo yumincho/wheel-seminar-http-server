@@ -89,17 +89,16 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
   }
 
   /* Session Checking */
-  char **cookieLine, **sessionID;
+  char** sessionID = NULL;
   int sessionChecked;
 
-  int cookieIndex = FindLine(numOfRequestLines, splitedRequest, "Cookie:");
+  int cookieIndex = FindLine(numOfRequestLines, splitedRequest, "sessionid=");
   if (cookieIndex != -1) {
-    cookieLine = &splitedRequest[cookieIndex];
-    SplitString(splitedRequest[cookieIndex], " ", &cookieLine);
-    SplitString(cookieLine[2], "=", &sessionID);
+    SplitString(splitedRequest[cookieIndex], "sessionid=", &sessionID);
+    sessionChecked = CheckSession(&g_Database, sessionID[1]);
+  } else {
+    sessionChecked = -1;
   }
-
-  sessionChecked = CheckSession(&g_Database, sessionID[1]);
 
   /* GET / */
   // 로그인된 경우, public/index.html 파일을 전송합니다.
@@ -170,15 +169,16 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
       if (loginResult == 0) {
         sprintf(response,
                 "HTTP/1.1 302 Found\r\n"
-                "Set-Cookie: sessionID=%s\r\n"
+                "Set-Cookie: sessionid=%s\r\n"
                 "Location: /\r\n"
                 "Content-Length: 0\r\n"
                 "Content-Type: text/plain\r\n"
                 "\r\n",
                 newSessionID);
+        sessionChecked = CheckSession(&g_Database, newSessionID);
       } else {
         sprintf(response,
-                "HTTP/1.1 403 Forbidden\r\n"
+                "HTTP/1.1 400 Bad Request\r\n"
                 "Content-Length: 0\r\n"
                 "Content-Type: text/plain\r\n"
                 "\r\n");
