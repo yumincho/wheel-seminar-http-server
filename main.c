@@ -244,9 +244,56 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
     }
   }
 
-  // Connection 헤더의 값에 따라, HTTP 응답을 보낸 후 TCP 연결을 끊거나 유지해야
-  // 합니다. 간단함을 위해, keep-alive인 경우(대소문자 구분 X) 연결을 유지하고,
-  // 그 외의 경우 연결을 즉시 끊는 것으로 합니다.
+  /* GET /text */
+  // 로그인된 경우, 데이터베이스의 text 카테고리를 조회해 저장된 문자열을
+  // 반환합니다. 저장된 문자열이 없는 경우, 빈 값을 반환합니다.
+  // 로그인되지 않은 경우, 적절한 응답 코드를 보내 잘못된 접근임을 알립니다.
+  if (!strcmp(startLine[0], "GET") && !strcmp(startLine[1], "/text")) {
+    if (!sessionChecked) {
+      printf("get text\n");
+      const char* userText = GetUserText(&g_Database, sessionID[1]);
+      sprintf(response,
+              "HTTP/1.1 200 OK: Authorized\r\n"
+              "Location: /\r\n"
+              "Content-Length: %d\r\n"
+              "Content-Type: text/plain\r\n"
+              "\r\n%s",
+              (int)strlen(userText), userText);
+    } else {
+      printf("no text\n");
+      sprintf(response,
+              "HTTP/1.1 403 Forbidden\r\n"
+              "Content-Length: 0\r\n"
+              "Content-Type: text/html\r\n"
+              "\r\n");
+    }
+  }
+
+  /* POST /text */
+  // 로그인된 경우, 데이터베이스의 text 카테고리에 HTTP 요청의 Body를
+  // 저장합니다.
+  // 로그인되지 않은 경우, 적절한 응답 코드를 보내 잘못된 접근임을 알립니다.
+  if (!strcmp(startLine[0], "POST") && !strcmp(startLine[1], "/text")) {
+    if (sessionChecked == 0) {
+      SetUserText(&g_Database, sessionID[1], body);
+      sprintf(response,
+              "HTTP/1.1 200 OK: Authorized\r\n"
+              "Location: /\r\n"
+              "Content-Length: 0\r\n"
+              "Content-Type: text/plain\r\n"
+              "\r\n");
+    } else {
+      sprintf(response,
+              "HTTP/1.1 403 Forbidden\r\n"
+              "Content-Length: 0\r\n"
+              "Content-Type: text/html\r\n"
+              "\r\n");
+    }
+  }
+
+  // Connection 헤더의 값에 따라, HTTP 응답을 보낸 후 TCP 연결을 끊거나
+  // 유지해야 합니다. 간단함을 위해, keep-alive인 경우(대소문자 구분 X) 연결을
+  // 유지하고, 그 외의 경우 연결을 즉시 끊는 것으로 합니다.
   char** connectionLine = NULL;
   int connectionIdx =
       FindLine(numOfRequestLines, splitedRequest, "Connection:");
