@@ -91,6 +91,8 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
 
   /* Session Checking */
   char **cookieLine, **sessionID;
+  int sessionChecked;
+
   int cookieIndex = FindLine(numOfRequestLines, splitedRequest, "Cookie:");
   if (cookieIndex != -1) {
     cookieLine = &splitedRequest[cookieIndex];
@@ -98,11 +100,12 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
     SplitString(cookieLine[2], "=", &sessionID);
   }
 
+  sessionChecked = CheckSession(&g_Database, sessionID[1]);
+
   /* GET / */
   // 로그인된 경우, public/index.html 파일을 전송합니다.
   // 로그인되지 않은 경우, /login으로 리다이렉트합니다.
   if (!strcmp(startLine[0], "GET") && !strcmp(startLine[1], "/")) {
-    int sessionChecked = CheckSession(&g_Database, sessionID[1]);
     if (sessionChecked == 0) {
       char* content;
       ReadTextFile("public/index.html", &content);
@@ -127,7 +130,6 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
   // 로그인된 경우, /로 리다이렉트합니다.
   // 로그인되지 않은 경우, public/login.html 파일을 전송합니다.
   if (!strcmp(startLine[0], "GET") && !strcmp(startLine[1], "/login")) {
-    int sessionChecked = CheckSession(&g_Database, sessionID[1]);
     if (sessionChecked == 0) {
       sprintf(response,
               "HTTP/1.1 200 OK: Authorized\r\n"
@@ -154,7 +156,6 @@ int DoSomething(HttpClient* client, const char* request, char* response) {
   // 쿠키를 이용해 세션 정보를 저장해야 합니다.
   // 성공한 경우, /로 리다이렉트합니다.
   if (!strcmp(startLine[0], "POST") && !strcmp(startLine[1], "/login")) {
-    int sessionChecked = CheckSession(&g_Database, sessionID[1]);
     if (sessionChecked == 0) {
       sprintf(response,
               "HTTP/1.1 400 Bad Request\r\n"
